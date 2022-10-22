@@ -19,9 +19,12 @@ const isLocalhost = Boolean(
 );
 
 export function register(config) {
-  if (process.env.NODE_ENV === 'production' && 'serviceWorker' in navigator) {
+  if ( 'serviceWorker' in navigator) {
     // The URL constructor is available in all browsers that support SW.
     const publicUrl = new URL(process.env.PUBLIC_URL, window.location.href);
+
+    console.log('publicUrl', publicUrl);
+
     if (publicUrl.origin !== window.location.origin) {
       // Our service worker won't work if PUBLIC_URL is on a different origin
       // from what our page is served on. This might happen if a CDN is used to
@@ -32,6 +35,8 @@ export function register(config) {
     window.addEventListener('load', () => {
       const swUrl = `${process.env.PUBLIC_URL}/service-worker.js`;
 
+      console.log('swUrl', swUrl);
+      console.log('isLocalhost', isLocalhost);
       if (isLocalhost) {
         // This is running on localhost. Let's check if a service worker still exists or not.
         checkValidServiceWorker(swUrl, config);
@@ -52,10 +57,15 @@ export function register(config) {
   }
 }
 
+let swRegistration = null;
+export const getSwRegistration = () => swRegistration
+
 function registerValidSW(swUrl, config) {
   navigator.serviceWorker
     .register(swUrl)
     .then((registration) => {
+      swRegistration = registration;
+      console.log('registration', registration);
       registration.onupdatefound = () => {
         const installingWorker = registration.installing;
         if (installingWorker == null) {
@@ -104,6 +114,7 @@ function checkValidServiceWorker(swUrl, config) {
     .then((response) => {
       // Ensure service worker exists, and that we really are getting a JS file.
       const contentType = response.headers.get('content-type');
+      console.log('contentType', contentType);
       if (
         response.status === 404 ||
         (contentType != null && contentType.indexOf('javascript') === -1)
