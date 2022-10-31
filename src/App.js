@@ -95,7 +95,7 @@ const checkTimes = ({sunsetRaw, shabatRaw}, setTimeLeft) => {
 }
 
 const KEY_TASK = 'keyTask';
-const tasksMock = [{name: 'Lights'}, {name: 'Air Conditioner'}, {name: 'Plata'}]
+const tasksMock = [{name: 'Lights', value: false}, {name: 'Air Conditioner', value: false}, {name: 'Plata', value: false}]
 const getTasks = () => JSON.parse(localStorage.getItem(KEY_TASK) || "null") || tasksMock;
 const saveTasks = tasks => localStorage.setItem(KEY_TASK, JSON.stringify(tasks));
     let deferredPrompt;
@@ -189,7 +189,7 @@ const FormDialog = ({isOpen, onAdd, onClose}) => {
   );
 }
 
-const Item = ({name, selected, onValueChange, onRemove}) => {
+const Item = ({name, value, onValueChange, onRemove}) => {
     const [swipeSize, setSwipeSize] = useState(0);
 
     const swipeHandlers = useSwipeable({
@@ -216,7 +216,7 @@ const Item = ({name, selected, onValueChange, onRemove}) => {
   return  (
     <div className={'checkboxContainer'} {...swipeHandlers} style={{    position: 'relative', left: -swipeSize, color: swipeSize ? '#bd5b5b' : undefined}}>
       <FormControlLabel
-        control={<Checkbox checked={selected.includes(name)} onChange={() => onValueChange(name)}/>}
+        control={<Checkbox checked={value} onChange={() => onValueChange(name)}/>}
         label={name}
         labelPlacement="start"
       />
@@ -253,24 +253,27 @@ function App() {
 
   }, [])
 
+  useEffect(() => {
+     saveTasks(tasks);
+  }, [tasks])
+
   const onValueChange = (name) => {
-    if(selected.includes(name)){
-      setSelected(selected.filter(v => v !== name))
-    }else {
-      setSelected([...selected, name])
-    }
+    tasks.forEach(t => {
+          if(t.name === name){
+              t.value = !t.value;
+          }
+    })
+    setTasks([...tasks]);
   }
 
   const onAdd = (value) => {
-    const newTask = [...tasks, {name: value}];
+    const newTask = [...tasks, {name: value, value: false}];
     setTasks(newTask);
-    saveTasks(newTask);
   }
 
   const onRemove = (value) => {
     const newTask = [...tasks.filter(({name}) => name !== value)];
     setTasks(newTask);
-    saveTasks(newTask);
   }
 
 
@@ -299,8 +302,8 @@ function App() {
         <Settings />
       </Fab>
       <div className={'taskContainer'} >
-        {tasks.map(({name}) => (
-          <Item name={name} selected={selected} onValueChange={onValueChange} onRemove={onRemove} />
+        {tasks.map(({name, value}) => (
+          <Item name={name} value={value} onValueChange={onValueChange} onRemove={onRemove} />
         ))}
       </div>
 
